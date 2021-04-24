@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ServerEndpoint(value = "/socket/{userid}",encoders = {Socketencoder.class})
 @Component
+
 public class WebSocket {
     String userid;
     private static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();

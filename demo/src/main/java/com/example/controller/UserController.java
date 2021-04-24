@@ -20,6 +20,7 @@ public class UserController {
     @Resource
     private UserMapper userMapper;
 
+    //登录逻辑，获取前端传来的参数，如果姓名和密码正确则返回成功
     @PostMapping("/login")
     public Result<User> login(@RequestBody User user) {
         if (!checkParam(user)) {//如果有参数未填写，返回错误
@@ -32,6 +33,31 @@ public class UserController {
         //如果可以查到对应的用户则返回成功
         return Result.success(dbUser);
     }
+
+    //注册逻辑，获取前端传来的数据，新注册一个用户，获取姓名昵称和密码
+    @PostMapping("/register")
+    public Result<User>register(@RequestBody User user){
+        if (!checkParam(user)) {//如果有参数未填写，返回错误
+            return Result.error("-1", "注册新用户请填写完整的用户信息");
+        }
+        userMapper.insertSelective(user);
+        return Result.success(user);
+    }
+
+    //删除逻辑，获取前端传来的username，删除该用户信息
+    @PostMapping("/deleteUser")
+    public Result<User>deleteUser(@RequestBody User user){
+        userMapper.deleteByName(user.getUsername());
+        return  Result.success();
+    }
+
+    //修改逻辑，获取前端username、nickname、password以修改用户信息
+    @PostMapping("/updateInfo")
+    public Result<User>updateInfo(@RequestBody User user){
+        userMapper.updateByPrimaryKey(user);
+        return  Result.success();
+    }
+
 
     private boolean checkParam(User user) {
         return user.getUsername() != null && user.getPassword() != null;
