@@ -148,6 +148,10 @@ public class WebSocket {
                 send(wb.getTouserid(),swb);
             }
         }
+        else{
+            swb.setMessage("前端已经接受"+wb.getMessagetype());
+            send(this.userid,swb);
+        }
 
 
     }
