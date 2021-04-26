@@ -28,130 +28,124 @@ public class WebSocket {
         Websocketmessage wb = JSON.parseObject(message,Websocketmessage.class);
         Websocketmessage swb = new Websocketmessage();
         //用户间通信
-        switch (wb.getMessagetype()) {
-            case "Communication":
+        if(wb.getMessagetype().equals("Communication")){
+            swb.setMessagetype(wb.getMessagetype());
+            swb.setContexttype(wb.getContexttype());
+            swb.setFromuserid(this.userid);
+            swb.setMessage(wb.getMessage());
+            //用户发送了一个文本消息
+            if(wb.getContexttype().equals(("Text"))){
+                //将该消息传入数据库
+
+            }
+            //用户发送了一个图片消息
+            else if(wb.getContexttype().equals("File")){
+                //将该消息存入数据库
+
+            }
+            else{
+                swb = new Websocketmessage();
+                swb.setMessagetype("Error");
+                senderror(swb);
+                return;
+            }
+            send(wb.getTouserid(),swb);
+        }
+        //群聊通信
+        else if (wb.getMessagetype().equals("GroupCommunication")){
+            swb.setMessagetype(wb.getMessagetype());
+            swb.setContexttype(wb.getContexttype());
+            swb.setFromuserid(this.userid);
+            swb.setMessage(wb.getMessage());
+            if(wb.getContexttype().equals("Text")){
+                //将该消息传入数据库
+            }
+            else if(wb.getContexttype().equals("File")){
+                //将该消息传入数据库
+            }
+            else{
+                swb=new Websocketmessage();
+                swb.setMessagetype("Error");
+                senderror(swb);
+                return;
+            }
+            send(wb.getTouserid(),swb);
+        }
+        //添加好友申请
+        else if (wb.getMessagetype().equals("AddFriend")){
+            swb.setMessagetype(wb.getMessagetype());
+            swb.setFromuserid(this.userid);
+            send(wb.getTouserid(),swb);
+        }
+        //加入群聊
+        else if(wb.getMessagetype().equals("AddGroup")){
+            //将该消息存入数据库(?)
+            swb.setMessagetype(wb.getMessagetype());
+            swb.setFromuserid(this.userid);
+            //从数据库中查的群聊的群主
+            String id="";
+            send(id,swb);
+        }
+        //创建群聊
+        else if (wb.getMessagetype().equals("CreateGroup")){
+            //向数据库建立群聊
+            send(this.userid,swb);
+        }
+        //匿名匹配聊天
+        else if (wb.getMessagetype().equals("UnNamedMatch")){
+            //调用函数（很麻烦）
+            send(this.userid,swb);
+        }
+        //话题匹配聊天
+        else if (wb.getMessagetype().equals("TopicMatch")){
+            //调用函数（很麻烦）
+            send(this.userid,swb);
+        }
+        //公开身份
+        else if (wb.getMessagetype().equals("Pub")){
+            swb.setMessagetype(wb.getMessagetype());
+            swb.setFromuserid(this.userid);
+            send(wb.getTouserid(),swb);
+
+        }
+        //功能型消息
+        else if (wb.getMessagetype().equals("Fuction")){
+            //添加好友成功响应
+            if (wb.getContexttype().equals("AddFriendSuccess")){
+                //将该消息存入数据库
+
                 swb.setMessagetype(wb.getMessagetype());
                 swb.setContexttype(wb.getContexttype());
                 swb.setFromuserid(this.userid);
-                swb.setMessage(wb.getMessage());
-                //用户发送了一个文本消息
-                switch (wb.getContexttype()) {
-                    case ("Text"):
-                        //将该消息传入数据库
+                send(wb.getTouserid(),swb);
+            }
+            //添加好友失败响应
+            else if (wb.getContexttype().equals("AddFriendFailed")){
+                //将该消息存入数据库（？）
 
-                        break;
-                    //用户发送了一个图片消息
-                    case "File":
-                        //将该消息存入数据库
-
-                        break;
-                    default:
-                        swb = new Websocketmessage();
-                        swb.setMessagetype("Error");
-                        senderror(swb);
-                        return;
-                }
-                send(wb.getTouserid(), swb);
-                break;
-            //群聊通信
-            case "GroupCommunication":
                 swb.setMessagetype(wb.getMessagetype());
                 swb.setContexttype(wb.getContexttype());
                 swb.setFromuserid(this.userid);
-                swb.setMessage(wb.getMessage());
-                switch (wb.getContexttype()) {
-                    case "Text":
-                        //将该消息传入数据库
-                        break;
-                    case "File":
-                        //将该消息传入数据库
-                        break;
-                    default:
-                        swb = new Websocketmessage();
-                        swb.setMessagetype("Error");
-                        senderror(swb);
-                        return;
-                }
-                send(wb.getTouserid(), swb);
-                break;
-            //添加好友申请
-            case "AddFriend":
+                send(wb.getTouserid(),swb);
+            }
+            //入群成功响应
+            else if(wb.getContexttype().equals("AddGroupSuccess")){
+                //将该消息存入数据库
+
                 swb.setMessagetype(wb.getMessagetype());
+                swb.setContexttype(wb.getContexttype());
                 swb.setFromuserid(this.userid);
-                send(wb.getTouserid(), swb);
-                break;
-            //加入群聊
-            case "AddGroup":
-                //将该消息存入数据库(?)
+                send(wb.getTouserid(),swb);
+            }
+            //入群失败响应
+            else if (wb.getContexttype().equals("AddGroupFailed")){
+                //将该消息存入数据库（？）
+
                 swb.setMessagetype(wb.getMessagetype());
-                swb.setFromuserid(this.userid);
-                //从数据库中查的群聊的群主
-                String id = "";
-                send(id, swb);
-                break;
-            //创建群聊
-            case "CreateGroup":
-                //向数据库建立群聊
-                send(this.userid, swb);
-                break;
-            //匿名匹配聊天
-            case "UnNamedMatch":
-                //调用函数（很麻烦）
-                send(this.userid, swb);
-                break;
-            //话题匹配聊天
-            case "TopicMatch":
-                //调用函数（很麻烦）
-                send(this.userid, swb);
-                break;
-            //公开身份
-            case "Pub":
-                swb.setMessagetype(wb.getMessagetype());
-                swb.setFromuserid(this.userid);
-                send(wb.getTouserid(), swb);
-
-                break;
-            //功能型消息
-            case "Fuction":
-                //添加好友成功响应
-                switch (wb.getContexttype()) {
-                    case "AddFriendSuccess":
-                        //将该消息存入数据库
-
-                        swb.setMessagetype(wb.getMessagetype());
-                        swb.setContexttype(wb.getContexttype());
-                        swb.setFromuserid(this.userid);
-                        send(wb.getTouserid(), swb);
-                        break;
-                    //添加好友失败响应
-                    case "AddFriendFailed":
-                        //将该消息存入数据库（？）
-
-                        swb.setMessagetype(wb.getMessagetype());
-                        swb.setContexttype(wb.getContexttype());
-                        swb.setFromuserid(this.userid);
-                        send(wb.getTouserid(), swb);
-                        break;
-                    //入群成功响应
-                    case "AddGroupSuccess":
-                        //将该消息存入数据库
-
-                        swb.setMessagetype(wb.getMessagetype());
-                        swb.setContexttype(wb.getContexttype());
-                        swb.setFromuserid(this.userid);
-                        send(wb.getTouserid(), swb);
-                        break;
-                    //入群失败响应
-                    case "AddGroupFailed":
-                        //将该消息存入数据库（？）
-
-                        swb.setMessagetype(wb.getMessagetype());
-                        swb.setContexttype(wb.getContexttype());
-                        swb.setFromuserid(wb.getFromuserid());
-                        send(wb.getTouserid(), swb);
-                        break;
-                }
-                break;
+                swb.setContexttype(wb.getContexttype());
+                swb.setFromuserid(wb.getFromuserid());
+                send(wb.getTouserid(),swb);
+            }
         }
 
 
