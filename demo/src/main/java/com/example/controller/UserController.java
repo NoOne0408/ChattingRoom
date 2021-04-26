@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 
 /**
  * 关注公众号：Java学习指南
@@ -32,6 +33,11 @@ public class UserController {
         }
         //如果可以查到对应的用户则返回成功
         return Result.success(dbUser);
+    }
+
+    public ArrayList<User> myFriends(@RequestBody Integer myid){
+        ArrayList<User> myfriends=new ArrayList<>();
+        return myfriends;
     }
 
     //注册逻辑，获取前端传来的数据，新注册一个用户，获取姓名昵称和密码
