@@ -10,6 +10,7 @@
   <sql id="Base_Column_List">
     id, username, nickname, `password`
   </sql>
+
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
@@ -24,10 +25,16 @@
     select <include refid="Base_Column_List" />
     from user where username = #{username} and password = #{password}
   </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from user
     where id = #{id,jdbcType=INTEGER}
   </delete>
+  <delete id="deleteByName" parameterType="java.lang.String">
+    delete from user
+    where username = #{username,jdbcType=VARCHAR}
+  </delete>
+
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.example.entity.User" useGeneratedKeys="true">
     insert into user (username, nickname, `password`
       )
@@ -59,6 +66,7 @@
       </if>
     </trim>
   </insert>
+
   <update id="updateByPrimaryKeySelective" parameterType="com.example.entity.User">
     update user
     <set>
@@ -74,11 +82,12 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.example.entity.User">
+  <update id="updateByPrimaryKey" parameterType="com.example.entity.User" >
     update user
     set username = #{username,jdbcType=VARCHAR},
       nickname = #{nickname,jdbcType=VARCHAR},
       `password` = #{password,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=INTEGER}
+    where username = #{username,jdbcType=VARCHAR}
   </update>
+
 </mapper>
