@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.Topic;
 import com.example.entity.User;
 import com.example.mapper.UserMapper;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,9 +36,50 @@ public class UserController {
         return Result.success(dbUser);
     }
 
+    //获取当前用户所有好友
     public ArrayList<User> myFriends(@RequestBody Integer myid){
         ArrayList<User> myfriends=new ArrayList<>();
+        //获取当前用户的所有好友信息
+        //myfriends=userMapper.selectFriendsById(myid);
         return myfriends;
+    }
+
+    //匿名用户匹配
+    public User anonymousUser(@RequestBody Integer myid,ArrayList<Integer> freeUsers){
+        User auser=new User();
+        //获取所有空闲可匹配用户的爱好详情信息
+        return (auser);
+    }
+
+    //匿名话题匹配
+    public Topic ourTopic(@RequestBody Integer id1,Integer id2){
+        Topic topic=new Topic();
+        //从用户标签表中获取用户1的兴趣标签列
+        ArrayList<Integer> hobbylist1=new ArrayList<>();
+        //hobbylist1=userMapper.selectHobbyByid(id1);
+        //从用户标签表中获取用户2的兴趣标签列
+        ArrayList<Integer> hobbylist2=new ArrayList<>();
+        //hobbylist2=userMapper.selectHobbyByid(id2);
+
+        int topicId=mutualHobby(hobbylist1,hobbylist2);
+
+        //根据话题类型选择一个合适的话题
+        //topic=userMapper.selectTopic(topicId);
+
+        return topic;
+    }
+
+    //获取两个hobbylist中重复的话题
+    private int mutualHobby(ArrayList<Integer> hobbylist1, ArrayList<Integer> hobbylist2) {
+        int topicId = 0;
+        for(int i=0;i<hobbylist1.size();i++){
+            int hobbid=hobbylist2.get(i);
+            if(hobbylist1.contains(hobbid)){
+                topicId=hobbid;
+                break;
+            }
+        }
+        return topicId;
     }
 
     //注册逻辑，获取前端传来的数据，新注册一个用户，获取姓名昵称和密码
