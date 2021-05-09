@@ -1,3 +1,1 @@
-ChattingRoom,基于websocket的匿名聊天室。
-使用springboot框架，mybatis持久层框架访问数据库mysql
-
+ChattingRoom

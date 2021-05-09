@@ -9,7 +9,6 @@
         border-radius: 5px; box-shadow:#ccc 0 0 10px; ">
     <div style="margin-top: 30px; text-align: center; ">
         <div style="text-align: center; margin-top: 80px; font-size: 30px; color: dodgerblue">欢迎登录ChattingRoom</div>
-
         <div style="margin-top: 30px">
             <input type="text" id="username" style="width: 60%; border: 1px solid #ccc; padding: 10px"
                    placeholder="请输入账号">
@@ -23,53 +22,6 @@
                  box-sizing: content-box; padding: 10px; cursor: pointer" onclick="login()">登录
             </button>
         </div>
-
-        <div style="margin-top: 30px">
-            <input type="text" id="reg_username" style="width: 60%; border: 1px solid #ccc; padding: 10px"
-                   placeholder="请输入账号">
-        </div>
-        <div style="margin-top: 30px">
-            <input type="text" id="reg_nickname" style="width: 60%; border: 1px solid #ccc; padding: 10px"
-                   placeholder="请输入昵称">
-        </div>
-        <div style="margin-top:10px">
-            <input type="password" id="reg_password" style="width: 60%; border: 1px solid #ccc; padding: 10px"
-                   placeholder="请输入密码">
-        </div>
-        <div style="margin-top: 30px">
-            <button style="width: 60%; border: none; background-color: dodgerblue; color: white; font-size: 16px;
-                 box-sizing: content-box; padding: 10px; cursor: pointer" onclick="register()">注册
-            </button>
-        </div>
-
-        <div style="margin-top: 30px">
-            <input type="text" id="del_username" style="width: 60%; border: 1px solid #ccc; padding: 10px"
-                   placeholder="请输入要删除的姓名">
-        </div>
-        <div style="margin-top: 30px">
-            <button style="width: 60%; border: none; background-color: dodgerblue; color: white; font-size: 16px;
-                 box-sizing: content-box; padding: 10px; cursor: pointer" onclick="delete_user()">确认删除
-            </button>
-        </div>
-
-        <div style="margin-top: 30px">
-            <input type="text" id="update_username" style="width: 60%; border: 1px solid #ccc; padding: 10px"
-                   placeholder="请输入账号">
-        </div>
-        <div style="margin-top: 30px">
-            <input type="text" id="update_nickname" style="width: 60%; border: 1px solid #ccc; padding: 10px"
-                   placeholder="请输入昵称">
-        </div>
-        <div style="margin-top:10px">
-            <input type="password" id="update_password" style="width: 60%; border: 1px solid #ccc; padding: 10px"
-                   placeholder="请输入密码">
-        </div>
-        <div style="margin-top: 30px">
-            <button style="width: 60%; border: none; background-color: dodgerblue; color: white; font-size: 16px;
-                 box-sizing: content-box; padding: 10px; cursor: pointer" onclick="updateUserInfo()">修改信息
-            </button>
-        </div>
-
     </div>
 </div>
 
@@ -83,7 +35,10 @@
             alert("请输入账号")
             return;
         }
+        const u1 = username;
+        const p1=password;
 
+        //alert(p1)
         let data = {username: username, password: password}
         $.ajax({
             type: "POST",
@@ -92,85 +47,12 @@
             contentType: "application/json",
             success: (res) => {
                 if (res.code === '0') {
-                    alert("登录成功")
                     location.href = "/";
                 } else {
                     alert("账号或密码错误")
                 }
             }
         })
-    }
-</script>
-
-<script>
-    function register(){
-        let username = $("#reg_username").val();
-        let nickname = $("#reg_nickname").val();
-        let password = $("#reg_password").val();
-
-        let data = {username: username, nickname:nickname, password: password}
-        $.ajax({
-            type: "POST",
-            url: "/user/register",
-            data: JSON.stringify(data),
-            contentType: "application/json",
-            success: (res) => {
-                if (res.code === '0') {
-                    alert("注册成功")
-                    location.href = "/";
-                } else {
-                    alert("注册失败")
-                }
-            }
-        })
-
-    }
-</script>
-
-<script>
-    function delete_user(){
-        let username = $("#del_username").val();
-        let data = {username: username}
-        $.ajax({
-            type: "POST",
-            url: "/user/deleteUser",
-            data: JSON.stringify(data),
-            contentType: "application/json",
-            success: (res) => {
-                if (res.code === '0') {
-                    alert("删除成功")
-                    location.href = "/";
-                } else {
-                    alert("删除错误")
-                }
-            }
-        })
-
-    }
-</script>
-
-<script>
-    function updateUserInfo(){
-        let username = $("#update_username").val();
-        let nickname = $("#update_nickname").val();
-        let password = $("#update_password").val();
-
-        let data = {username: username, nickname:nickname, password: password}
-        $.ajax({
-            type: "POST",
-            url: "/user/updateInfo",
-            data: JSON.stringify(data),
-            contentType: "application/json",
-            success: (res) => {
-                if (res.code === '0') {
-                    alert("修改成功")
-                    location.href = "/";
-                } else {
-                    alert("修改失败")
-                }
-            }
-        })
-
     }
 </script>
 

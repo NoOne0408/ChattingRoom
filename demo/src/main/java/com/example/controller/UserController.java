@@ -20,17 +20,15 @@ public class UserController {
     @Resource
     private UserMapper userMapper;
 
-    //登录逻辑，获取前端传来的参数，如果姓名和密码正确则返回成功
     @PostMapping("/login")
     public Result<User> login(@RequestBody User user) {
-        if (!checkParam(user)) {//如果有参数未填写，返回错误
+        if (!checkParam(user)) {
             return Result.error("-1", "缺少必要参数");
         }
         User dbUser = userMapper.selectByUsernameAndPassword(user);
-        if (dbUser == null) {//如果通过账号和密码无法找到对应的用户
+        if (dbUser == null) {
             return Result.error("-1", "账号或密码错误");
         }
-        //如果可以查到对应的用户则返回成功
         return Result.success(dbUser);
     }
 

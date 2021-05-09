@@ -21,6 +21,4 @@ public interface UserMapper {
     int updateByPrimaryKey(User record);
 
     User selectByUsernameAndPassword(User user);
-
-    int deleteByName(String name);
 }

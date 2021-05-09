@@ -50,6 +50,4 @@ public class Result<T> {
         result.msg = msg;
         return result;
     }
-
-
 }
