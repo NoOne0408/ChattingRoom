@@ -11,11 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Collections;
 
-/**
- * 关注公众号：Java学习指南
- * 后台回复：登录  获取源码
- */
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -47,8 +45,36 @@ public class UserController {
     //匿名用户匹配
     public User anonymousUser(@RequestBody Integer myid,ArrayList<Integer> freeUsers){
         User auser=new User();
+        ArrayList<Integer> similarity=new ArrayList<Integer>();
+        ArrayList<Integer> myhobbylist=new ArrayList<Integer>();
+        ArrayList<Integer> userhobbylist=new ArrayList<Integer>();
+
+        //hobbylist=userMapper.selectHobbyByid(myid);
         //获取所有空闲可匹配用户的爱好详情信息
+        for(int i=0;i<freeUsers.size();i++){
+            if(myhobbylist.size()>=userhobbylist.size()){
+                similarity.add(hobbySimilarity(myhobbylist,userhobbylist));
+            }
+            else if(myhobbylist.size()<userhobbylist.size()){
+                similarity.add(mutualHobby(userhobbylist,myhobbylist));
+            }
+        }
+
+        int index = similarity.indexOf(Collections.max(similarity));
+        //auser=userMapper.selectUserById(index);
         return (auser);
+    }
+
+    //计算两好友之间的兴趣相似度
+    public int hobbySimilarity(ArrayList<Integer> hobbylist1, ArrayList<Integer> hobbylist2){
+        int similarity=0;
+        for(int i=0;i<hobbylist1.size()&&i<hobbylist2.size();i++){
+            int hobbid=hobbylist2.get(i);
+            if(hobbylist1.contains(hobbid)){
+                similarity++;
+            }
+        }
+        return similarity;
     }
 
     //匿名话题匹配
@@ -61,18 +87,23 @@ public class UserController {
         ArrayList<Integer> hobbylist2=new ArrayList<>();
         //hobbylist2=userMapper.selectHobbyByid(id2);
 
-        int topicId=mutualHobby(hobbylist1,hobbylist2);
+        //将数据较多的作为被比较的列表，避免找不到共同话题
+        if(hobbylist1.size()>=hobbylist2.size()){
+            int topicId=mutualHobby(hobbylist1,hobbylist2);
+        }
+        else if(hobbylist1.size()<hobbylist2.size()){
+            int topicId=mutualHobby(hobbylist2,hobbylist1);
+        }
 
         //根据话题类型选择一个合适的话题
         //topic=userMapper.selectTopic(topicId);
-
         return topic;
     }
 
     //获取两个hobbylist中重复的话题
     private int mutualHobby(ArrayList<Integer> hobbylist1, ArrayList<Integer> hobbylist2) {
         int topicId = 0;
-        for(int i=0;i<hobbylist1.size();i++){
+        for(int i=0;i<hobbylist1.size()&&i<hobbylist2.size();i++){
             int hobbid=hobbylist2.get(i);
             if(hobbylist1.contains(hobbid)){
                 topicId=hobbid;
