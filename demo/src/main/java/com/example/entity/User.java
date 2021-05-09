@@ -1,12 +1,43 @@
 package com.example.entity;
 
-import java.io.Serializable;
 
-/**
- * user
- * @author 
- */
 
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+@Entity
+@Getter
+@Setter
+public class User {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(name = "username", nullable = true, length = 20)
+    private String username;
+
+    @Column(name = "password", nullable = true, length = 20)
+    private String password;
+
+    @Column(name = "icon", nullable = true, length = 20)
+    private String icon;
+
+    @Column(name = "email", nullable = true, length = 20)
+    private String email;
+
+    @Column(name = "nickname", nullable = true, length = 20)
+    private String nickname;
+
+    @Column(name = "onlineFlag", nullable = true, length = 4)
+    private int onlineFlag;
+}
+/*
 public class User implements Serializable {
     private Integer id;
 
@@ -53,4 +84,4 @@ public class User implements Serializable {
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
-}
+}*/

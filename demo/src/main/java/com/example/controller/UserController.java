@@ -1,8 +1,11 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.Person;
 import com.example.entity.User;
 import com.example.mapper.UserMapper;
+import com.example.repository.PersonRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +20,6 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    @Resource
     private UserMapper userMapper;
 
     @PostMapping("/login")
