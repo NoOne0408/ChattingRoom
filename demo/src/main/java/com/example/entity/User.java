@@ -1,7 +1,5 @@
 package com.example.entity;
 
-
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +12,6 @@ import javax.persistence.Id;
 @Getter
 @Setter
 public class User {
-
     @Id
     @GeneratedValue
     private Long id;
@@ -35,7 +32,7 @@ public class User {
     private String nickname;
 
     @Column(name = "onlineFlag", nullable = true, length = 4)
-    private int onlineFlag;
+    private Integer onlineFlag;
 }
 /*
 public class User implements Serializable {

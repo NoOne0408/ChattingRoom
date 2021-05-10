@@ -1,13 +1,16 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.POJO.*;
 import com.example.entity.Topic;
 import com.example.entity.User;
 import com.example.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.socket.WebSocketMessage;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -17,7 +20,7 @@ import java.util.Collections;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    @Resource
+    @Autowired
     private UserMapper userMapper;
 
     @PostMapping("/login")
@@ -29,6 +32,13 @@ public class UserController {
         if (dbUser == null) {
             return Result.error("-1", "账号或密码错误");
         }
+        System.out.println("hhh"+user.getId());
+        System.out.println("hhh"+user.getUsername());
+        Websocketmessage webSocketmessage=new Websocketmessage();
+        webSocketmessage.setFromuserid("123456");
+
+        WebSocket.send("1",webSocketmessage);
+
         return Result.success(dbUser);
     }
 
@@ -36,7 +46,7 @@ public class UserController {
     public ArrayList<User> myFriends(@RequestBody Integer myid){
         ArrayList<User> myfriends=new ArrayList<>();
         //获取当前用户的所有好友信息
-        //myfriends=userMapper.selectFriendsById(myid);
+        myfriends=userMapper.selectFriendsById(myid);
         return myfriends;
     }
 
@@ -59,7 +69,7 @@ public class UserController {
         }
 
         int index = similarity.indexOf(Collections.max(similarity));
-        //auser=userMapper.selectUserById(index);
+        auser=userMapper.selectUserById(index);
         return (auser);
     }
 
@@ -80,21 +90,22 @@ public class UserController {
         Topic topic=new Topic();
         //从用户标签表中获取用户1的兴趣标签列
         ArrayList<Integer> hobbylist1=new ArrayList<>();
-        //hobbylist1=userMapper.selectHobbyByid(id1);
+        hobbylist1=userMapper.selectHobbyById(id1);
         //从用户标签表中获取用户2的兴趣标签列
         ArrayList<Integer> hobbylist2=new ArrayList<>();
-        //hobbylist2=userMapper.selectHobbyByid(id2);
+        hobbylist2=userMapper.selectHobbyById(id2);
 
+        int topicId=0;
         //将数据较多的作为被比较的列表，避免找不到共同话题
         if(hobbylist1.size()>=hobbylist2.size()){
-            int topicId=mutualHobby(hobbylist1,hobbylist2);
+            topicId=mutualHobby(hobbylist1,hobbylist2);
         }
         else if(hobbylist1.size()<hobbylist2.size()){
-            int topicId=mutualHobby(hobbylist2,hobbylist1);
+            topicId=mutualHobby(hobbylist2,hobbylist1);
         }
 
         //根据话题类型选择一个合适的话题
-        //topic=userMapper.selectTopic(topicId);
+        topic=userMapper.selectTopic(topicId);
         return topic;
     }
 

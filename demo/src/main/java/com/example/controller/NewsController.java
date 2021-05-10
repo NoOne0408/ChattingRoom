@@ -12,7 +12,6 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/news")
 public class NewsController {
-    @Resource
     private UserMapper userMapper;
 
 //    //发布动态
