@@ -58,6 +58,20 @@ public class UserMapper {
         else
             return t;
     }
+    public void insertSelective(User user){
+        userRepository.saveAndFlush(user);
+        return;
+    }
+    public void deleteByName(String username){
+        User u = userRepository.findByUsername(username    );
+        userRepository.delete(u);
+        return;
+    }
+    public void updateByPrimaryKey(User user){
+        userRepository.deleteById(user.getId());
+        userRepository.saveAndFlush(user);
+        return;
+    }
 /*    int deleteByPrimaryKey(Integer id);
 
     int insert(User record);
