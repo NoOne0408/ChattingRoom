@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.example.POJO.Maptype;
 import com.example.POJO.Websocketmessage;
 import com.example.coder.Socketencoder;
+import com.example.entity.User;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.OnClose;
@@ -211,6 +212,14 @@ class Map implements Runnable {
             }
             lock.unlock();
             //调用函数
+
+            ArrayList<Integer> list = new ArrayList<>();
+            for(ConcurrentHashMap.Entry<String, Maptype> entry: WebSocket.maplist.entrySet()) {
+                list.add(Integer.parseInt(entry.getValue().getId()));
+                UserController userController=new UserController();
+                User user=userController.anonymousUser(Integer.parseInt(this.id),list);
+                System.out.println("auser"+user.getUsername());
+            }
         }
         lock.lock();
         if(WebSocket.maplist.get(id).getState()==1){

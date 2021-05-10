@@ -15,6 +15,7 @@ import org.springframework.web.socket.WebSocketMessage;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 
 @RestController
@@ -23,6 +24,8 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+
+    //登录逻辑，前端传来username和password，验证身份
     @PostMapping("/login")
     public Result<User> login(@RequestBody User user) {
         if (!checkParam(user)) {
@@ -32,12 +35,24 @@ public class UserController {
         if (dbUser == null) {
             return Result.error("-1", "账号或密码错误");
         }
-        System.out.println("hhh"+user.getId());
-        System.out.println("hhh"+user.getUsername());
-        Websocketmessage webSocketmessage=new Websocketmessage();
-        webSocketmessage.setFromuserid("123456");
 
-        WebSocket.send("1",webSocketmessage);
+        //测试打印全部好友和匿名话题匹配
+//        ArrayList<User> myfri=myFriends(1);
+//        for(int i=0;i<myfri.size();i++){
+//            System.out.println(myfri.get(i).getEmail());
+//            int myid=Integer.parseInt(String.valueOf(dbUser.getId()));
+//            int yourid=Integer.parseInt(String.valueOf(myfri.get(i).getId()));
+//            Topic topic=ourTopic(myid,yourid);
+//        }
+
+//        //测试匿名好友匹配
+//        ArrayList<Integer> userList=new ArrayList<Integer>();
+//        userList.add(2);
+//        userList.add(3);
+//        userList.add(4);
+//        int myid=Integer.parseInt(String.valueOf(dbUser.getId()));
+//        User fitFri=anonymousUser(myid,userList);
+//        System.out.println(fitFri.getUsername());
 
         return Result.success(dbUser);
     }
@@ -53,24 +68,52 @@ public class UserController {
     //匿名用户匹配
     public User anonymousUser(@RequestBody Integer myid,ArrayList<Integer> freeUsers){
         User auser=new User();
-        ArrayList<Integer> similarity=new ArrayList<Integer>();
+        int[] similarityArray = new int[freeUsers.size()];//存放相似度
+        int[] userIdArray = new int[freeUsers.size()];//存放相似度对应的用户id
+
         ArrayList<Integer> myhobbylist=new ArrayList<Integer>();
         ArrayList<Integer> userhobbylist=new ArrayList<Integer>();
 
-        //hobbylist=userMapper.selectHobbyByid(myid);
+        myhobbylist=userMapper.selectHobbyById(myid);//获取我的爱好列表
+
         //获取所有空闲可匹配用户的爱好详情信息
         for(int i=0;i<freeUsers.size();i++){
+            userhobbylist=userMapper.selectHobbyById(freeUsers.get(i));//获取好友爱好列表
+
+            //为了匹配更精确，以爱好多的一方为匹配对象
             if(myhobbylist.size()>=userhobbylist.size()){
-                similarity.add(hobbySimilarity(myhobbylist,userhobbylist));
+                int similarity=hobbySimilarity(myhobbylist,userhobbylist);
+                System.out.println("similarity"+similarity);
+                similarityArray[i]=similarity;
+                userIdArray[i]=freeUsers.get(i);
             }
             else if(myhobbylist.size()<userhobbylist.size()){
-                similarity.add(mutualHobby(userhobbylist,myhobbylist));
+                int similarity=mutualHobby(userhobbylist,myhobbylist);
+                System.out.println("similarity"+similarity);
+                similarityArray[i]=similarity;
+                userIdArray[i]=freeUsers.get(i);
             }
         }
 
-        int index = similarity.indexOf(Collections.max(similarity));
-        auser=userMapper.selectUserById(index);
+        int maxIndex=findMaxIndex(similarityArray);//返回相似度最高的用户的id所在位置
+        int fitUserId=userIdArray[maxIndex];//返回相似度最高的用户id
+        System.out.println("fitUserId:"+fitUserId);
+
+        auser=userMapper.selectUserById(fitUserId);//查询好友并且返回
+        System.out.println("auser"+auser.getUsername());
         return (auser);
+    }
+
+    public int findMaxIndex(int[] array){
+        int max = 0;
+        int maxIndex=0;
+        for (int i = 0; i < array.length; i++) {
+            if(max < array[i]){
+                max = array[i];
+                maxIndex=i;
+            }
+        }
+        return maxIndex;
     }
 
     //计算两好友之间的兴趣相似度
@@ -103,6 +146,7 @@ public class UserController {
         else if(hobbylist1.size()<hobbylist2.size()){
             topicId=mutualHobby(hobbylist2,hobbylist1);
         }
+        System.out.println("相似话题"+topicId);
 
         //根据话题类型选择一个合适的话题
         topic=userMapper.selectTopic(topicId);
@@ -121,7 +165,6 @@ public class UserController {
         }
         return topicId;
     }
-
 
 
     //注册逻辑，获取前端传来的数据，新注册一个用户，获取姓名昵称和密码
