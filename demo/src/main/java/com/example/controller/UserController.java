@@ -111,6 +111,8 @@ public class UserController {
         return topicId;
     }
 
+
+
     //注册逻辑，获取前端传来的数据，新注册一个用户，获取姓名昵称和密码
     @PostMapping("/register")
     public Result<User>register(@RequestBody User user){

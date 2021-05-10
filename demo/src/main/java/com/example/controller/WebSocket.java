@@ -2,6 +2,7 @@ package com.example.controller;
 
 
 import com.alibaba.fastjson.JSON;
+import com.example.POJO.Maptype;
 import com.example.POJO.Websocketmessage;
 import com.example.coder.Socketencoder;
 import org.springframework.stereotype.Component;
@@ -13,15 +14,23 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 @ServerEndpoint(value = "/socket/{userid}",encoders = {Socketencoder.class})
 @Component
 
 public class WebSocket {
+    static Lock lock = new ReentrantLock();
     String userid;
-    private static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
+    String mapid=null;
+    public static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, Maptype> maplist = new ConcurrentHashMap<>();
+
+
 
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
@@ -95,11 +104,14 @@ public class WebSocket {
         //匿名匹配聊天
         else if (wb.getMessagetype().equals("UnNamedMatch")){
             //调用函数（很麻烦）
-            send(this.userid,swb);
-        }
-        //话题匹配聊天
-        else if (wb.getMessagetype().equals("TopicMatch")){
-            //调用函数（很麻烦）
+            lock.lock();
+            Maptype mt = new Maptype();
+            mt.setId(this.userid);
+            mt.setState(0);
+            maplist.put(this.userid,mt);
+            lock.unlock();
+            Map map = new Map(this.userid);
+            map.start();
             send(this.userid,swb);
         }
         //公开身份
@@ -167,7 +179,7 @@ public class WebSocket {
         connections.remove(this.userid);
         System.out.println("用户"+userid+"断开！");
     }
-    public void send(String id, Websocketmessage message){
+    public static void send(String id, Websocketmessage message){
         Session session = connections.get(id);
         if(session!=null && session.isOpen()){
             session.getAsyncRemote().sendObject(message);
@@ -179,4 +191,47 @@ public class WebSocket {
     }
 
 
+}
+
+class Map implements Runnable {
+    private Thread t;
+    private Lock lock;
+    private String id;
+
+    public Map(String id){
+        this.lock=WebSocket.lock;
+        this.id=id;
+    }
+    public void run() {
+        while(true){
+            lock.lock();
+            if(WebSocket.maplist.get(id).getState()!=0){
+                lock.unlock();
+                break;
+            }
+            lock.unlock();
+            //调用函数
+        }
+        lock.lock();
+        if(WebSocket.maplist.get(id).getState()==1){
+            WebSocket.maplist.remove(id);
+            lock.unlock();
+            Websocketmessage swm = new Websocketmessage();
+            swm.setMessage("UnNamedMatch");
+            swm.setTouserid(WebSocket.maplist.get(id).getMapid());
+            WebSocket.send(id,swm);
+        }
+        else{
+            WebSocket.maplist.remove(id);
+            lock.unlock();
+        }
+
+    }
+
+    public void start () {
+        if (t == null) {
+            t = new Thread ();
+            t.start ();
+        }
+    }
 }
