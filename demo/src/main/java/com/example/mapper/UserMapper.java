@@ -75,6 +75,15 @@ public class UserMapper {
         userRepository.saveAndFlush(user);
         return;
     }
+    public ArrayList<Topic> selectFitTopic(String topic){
+       List<Topic> res = topicRepository.findByType(topic);
+       ArrayList<Topic> result = new ArrayList<>();
+       for (Topic t :res){
+        result.add(t);
+       }
+       return result;
+    }
+    
 /*    int deleteByPrimaryKey(Integer id);
 
     int insert(User record);
