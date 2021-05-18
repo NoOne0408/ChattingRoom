@@ -34,6 +34,6 @@ public class Record {
     @Column(name = "time", nullable = true)
     private Date time;
     
-    @Column(name = "recordType", nullable = true, length = 200)
+    @Column(name = "content", nullable = true, length = 200)
     private String content;
 }
