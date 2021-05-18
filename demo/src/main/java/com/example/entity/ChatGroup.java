@@ -8,10 +8,9 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-public class Group {
+public class Grouping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, unique = true)
     private Long id;
     //private Integer id;
 
