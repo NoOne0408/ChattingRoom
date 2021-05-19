@@ -47,7 +47,8 @@
             contentType: "application/json",
             success: (res) => {
                 if (res.code === '0') {
-                    location.href = "/";
+                    alert(res.data.username)
+                    //location.href = "/";
                 } else {
                     alert("账号或密码错误")
                 }
