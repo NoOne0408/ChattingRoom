@@ -14,9 +14,8 @@ public class RecordMapper{
     @Autowired
     private RecordRepository recordRepository;
     
-    public Record createRecord(){
-        Record r = new Record();
-        recordRepository.saveAndFlush(r);
-        return r;
+    public Record createRecord(Record rec){
+        recordRepository.saveAndFlush(rec);
+        return rec;
     }
 }
