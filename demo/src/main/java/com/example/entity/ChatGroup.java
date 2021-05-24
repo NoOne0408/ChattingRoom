@@ -17,4 +17,6 @@ public class ChatGroup {
     @Column(name = "name", nullable = true, length = 20)
     private String name;
 
+    @Column(name = "masterUserId",nullable = true,length=20)
+    private Long masterUserId;
 }
