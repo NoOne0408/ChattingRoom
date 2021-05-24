@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import com.example.common.Result;
-import com.example.POJO.*;
 import com.example.entity.Topic;
 import com.example.entity.User;
 import com.example.mapper.UserMapper;
@@ -10,12 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.socket.WebSocketMessage;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Random;
 
 
 @RestController
@@ -24,11 +20,32 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+//    @PostMapping("/deleteFri")
+//    public Result<User> deleteFriend(@RequestBody Integer myId, Integer friId){
+//        //删除好友，操作成功后返回true，否则返回false
+//        Boolean flag = null;
+//        //flag=userMapper.deleteFriById(myId,friId);
+//        if(!flag){
+//            return Result.error("-1","删除好友失败");
+//        }
+//        return Result.success();
+//    }
+//
+//    @PostMapping("/addFri")
+//    public Result<User>addFriend(@RequestBody Integer myId,Integer friId){
+//        //添加好友，操作成功后返回user
+//        User dbUser = null;
+//        //dbUser=userMapper.addFriById(myId,friId);
+//        if(dbUser==null){
+//            return Result.error("-1","添加好友失败");
+//        }
+//        return Result.success();
+//    }
 
     //登录逻辑，前端传来username和password，验证身份
     @PostMapping("/login")
     public Result<User> login(@RequestBody User user) {
-        if (!checkParam(user)) {
+        if (!checkUserParam(user)) {
             return Result.error("-1", "缺少必要参数");
         }
         User dbUser = userMapper.selectByUsernameAndPassword(user);
@@ -36,7 +53,7 @@ public class UserController {
             return Result.error("-1", "账号或密码错误");
         }
 
-        //测试打印全部好友和匿名话题匹配
+//        //测试打印全部好友和匿名话题匹配
 //        ArrayList<User> myfri=myFriends(1);
 //        for(int i=0;i<myfri.size();i++){
 //            System.out.println(myfri.get(i).getEmail());
@@ -53,7 +70,7 @@ public class UserController {
 //        int myid=Integer.parseInt(String.valueOf(dbUser.getId()));
 //        User fitFri=anonymousUser(myid,userList);
 //        System.out.println(fitFri.getUsername());
-
+//        System.out.println(dbUser.getUsername());
         return Result.success(dbUser);
     }
 
@@ -138,18 +155,28 @@ public class UserController {
         ArrayList<Integer> hobbylist2=new ArrayList<>();
         hobbylist2=userMapper.selectHobbyById(id2);
 
-        int topicId=0;
+        int topicTypeId=0;
         //将数据较多的作为被比较的列表，避免找不到共同话题
         if(hobbylist1.size()>=hobbylist2.size()){
-            topicId=mutualHobby(hobbylist1,hobbylist2);
+            topicTypeId=mutualHobby(hobbylist1,hobbylist2);
         }
         else if(hobbylist1.size()<hobbylist2.size()){
-            topicId=mutualHobby(hobbylist2,hobbylist1);
+            topicTypeId=mutualHobby(hobbylist2,hobbylist1);
         }
-        System.out.println("相似话题"+topicId);
+        System.out.println("相似话题类型："+topicTypeId);
 
-        //根据话题类型选择一个合适的话题
-        topic=userMapper.selectTopic(topicId);
+        //根据话题类型选择合适的话题列表
+        ArrayList<Topic> topicsList;
+        topicsList=userMapper.selectFitTopic(String.valueOf(topicTypeId));
+        System.out.println("此类型话题个数："+topicsList.size());
+
+        //在可匹配话题列表中随机选一个话题
+        Random rand = new Random();
+        int whichTopic=rand.nextInt(topicsList.size());
+        System.out.println("随机数："+whichTopic);
+        //topic=userMapper.selectTopic(whichTopic);
+        topic=topicsList.get(whichTopic);
+        System.out.println("话题内容："+topic.getContent());
         return topic;
     }
 
@@ -170,7 +197,7 @@ public class UserController {
     //注册逻辑，获取前端传来的数据，新注册一个用户，获取姓名昵称和密码
     @PostMapping("/register")
     public Result<User>register(@RequestBody User user){
-        if (!checkParam(user)) {//如果有参数未填写，返回错误
+        if (!checkUserParam(user)) {//如果有参数未填写，返回错误
             return Result.error("-1", "注册新用户请填写完整的用户信息");
         }
         userMapper.insertSelective(user);
@@ -192,7 +219,7 @@ public class UserController {
     }
 
 
-    private boolean checkParam(User user) {
+    private boolean checkUserParam(User user) {
         return user.getUsername() != null && user.getPassword() != null;
     }
 }

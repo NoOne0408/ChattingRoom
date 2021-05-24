@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.example.POJO.Maptype;
 import com.example.POJO.Websocketmessage;
 import com.example.coder.Socketencoder;
+import com.example.entity.Topic;
 import com.example.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class WebSocket {
     static Lock lock = new ReentrantLock();
     String userid;
-    String mapid=null;
+    public Boolean issend = false;
+    public Lock send = new ReentrantLock();
     public static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<String, Maptype> maplist = new ConcurrentHashMap<>();
 
@@ -100,6 +102,7 @@ public class WebSocket {
         //创建群聊
         else if (wb.getMessagetype().equals("CreateGroup")){
             //向数据库建立群聊
+            //Group group = GroupMapper.createGroup(id,GroupName)
             send(this.userid,swb);
         }
         //匿名匹配聊天
@@ -113,7 +116,6 @@ public class WebSocket {
             lock.unlock();
             Map map = new Map(this.userid);
             map.start();
-            send(this.userid,swb);
         }
         //公开身份
         else if (wb.getMessagetype().equals("Pub")){
@@ -160,6 +162,29 @@ public class WebSocket {
                 swb.setFromuserid(wb.getFromuserid());
                 send(wb.getTouserid(),swb);
             }
+            //匿名取消
+            else if(wb.getContexttype().equals("UnNamedCancel")){
+                lock.lock();
+                maplist.get(this.userid).setState(2);
+                lock.unlock();
+            }
+        }
+        //发送动态
+        else  if(wb.getMessagetype().equals("ReleaseNews")){
+            swb.setMessagetype(wb.getMessagetype());
+            swb.setFromuserid(this.userid);
+
+            UserController userController=new UserController();
+
+            //获取到所有好友并向他们发出新动态提醒
+            ArrayList<User> myfriends;
+            myfriends=userController.myFriends(Integer.parseInt(this.userid));
+            for(int i=0;i<myfriends.size();i++){
+                send(myfriends.get(i).getId().toString(),swb);
+            }
+
+            //在数据库中存储动态
+
         }
         else{
             swb.setMessage("前端已经接受"+wb.getMessagetype());
@@ -204,34 +229,52 @@ class Map implements Runnable {
         this.id=id;
     }
     public void run() {
+        User user;
         while(true){
+            //判断是否仍然需要匹配
             lock.lock();
             if(WebSocket.maplist.get(id).getState()!=0){
                 lock.unlock();
                 break;
             }
             lock.unlock();
-            //调用函数
-
+            //进行匹配
             ArrayList<Integer> list = new ArrayList<>();
             for(ConcurrentHashMap.Entry<String, Maptype> entry: WebSocket.maplist.entrySet()) {
-                list.add(Integer.parseInt(entry.getValue().getId()));
-                UserController userController=new UserController();
-                User user=userController.anonymousUser(Integer.parseInt(this.id),list);
-                System.out.println("auser"+user.getUsername());
+                if(entry.getValue().getId()!=this.id)
+                    list.add(Integer.parseInt(entry.getValue().getId()));
+            }
+            UserController userController=new UserController();
+            user=userController.anonymousUser(Integer.parseInt(this.id),list);
+            System.out.println("auser："+user.getUsername());
+            //判断该次匹配是否有效
+            if(user != null){
+                lock.lock();
+                if(WebSocket.maplist.containsKey(user.getId().toString())){
+                    if(WebSocket.maplist.get(user.getId().toString()).getState()==0){
+                        WebSocket.maplist.get(user.getId().toString()).setState(1);    //设置被匹配到用户的状态
+                        WebSocket.maplist.get(this.id).setState(1);         //设置自己为已匹配到用户的状态
+                        WebSocket.maplist.get(this.id).setMapid(user.getId().toString());
+                        WebSocket.maplist.get(user.getId().toString()).setMapid(this.id);
+                    }
+                }
+                lock.unlock();
             }
         }
+        //停止匹配后进行的操作
         lock.lock();
-        if(WebSocket.maplist.get(id).getState()==1){
+        if(WebSocket.maplist.get(id).getState()==1){//匹配到对方
+            String mappedid = WebSocket.maplist.get(this.id).getMapid();
             WebSocket.maplist.remove(id);
             lock.unlock();
-            Websocketmessage swm = new Websocketmessage();
-            swm.setMessage("UnNamedMatch");
-            swm.setTouserid(WebSocket.maplist.get(id).getMapid());
-            WebSocket.send(id,swm);
+
+
+            UserController userController = new UserController();
+            Topic topic = userController.ourTopic(Integer.parseInt(this.id),Integer.parseInt(mappedid));
+
         }
         else{
-            WebSocket.maplist.remove(id);
+            WebSocket.maplist.remove(id);//匹配取消
             lock.unlock();
         }
 
